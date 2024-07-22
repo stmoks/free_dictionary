@@ -1,7 +1,8 @@
+#%%
 import requests
-import pandas as pd
+import polars as pl
 
-
+#%%
 word_entry = {}
 list_of_definitions = []
 
@@ -20,29 +21,35 @@ while True:
             word_entry['antonym'] = item['definitions'][0].get('antonym','')
             list_of_definitions.append(word_entry.copy())
         break  
-    except:
-        print('There was something wrong with your entry. Please make sure the spelling of the word is correct')
+    except Exception as e:
+        print('There was something wrong with your entry. Please make sure the spelling of the word is correct',e)
 
 
-df = pd.DataFrame.from_dict(list_of_definitions)
+df = pl.from_dicts(list_of_definitions)
 
-
-list_of_parts_of_speech = df['part_of_speech'].tolist()
+#%%
+list_of_parts_of_speech = df['part_of_speech'].to_list()
 while True:
     try:
-        part_of_speech_input = input(f'Please enter the part of speech you would like a meaning for: ({",".join(df["part_of_speech"].tolist())})\n').lower().strip()
+        part_of_speech_input = input(f'Please enter the part of speech you would like a meaning for: ({",".join(df["part_of_speech"].to_list())})\n').lower().strip()
         if part_of_speech_input in list_of_parts_of_speech:
-            pos_df = df[df['part_of_speech'] == part_of_speech_input]
+            pos_df = df.filter(pl.col('part_of_speech') == part_of_speech_input)
             print(pos_df)
             break
-    except:
+    except Exception as e:
         print('There was something wrong with your entry.')
-        
-try:
-    to_csv = input('Would you like to convert the definitions to a csv file?(Y/N)\n').lower()
-    if to_csv == 'y':
-        df.to_csv(f'definitions_of_{word}.csv',index=False,encoding='utf-16')
-except:
-    print('Sorry, there was something wrong with your entry')
+
+while True:
+    try:
+        to_csv = input('Would you like to convert the definitions to a csv file?(Y/N)\n').lower()
+        if to_csv == 'y':
+            df.write_csv(f'definitions_of_{word}.csv')
+            print('File saved!')
+            break
+        else:
+            break
+    except Exception as e:
+        print('Sorry, there was something wrong with your entry',e)
 print(df)
     
+# %%
