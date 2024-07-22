@@ -2,6 +2,7 @@
 import requests
 import polars as pl
 
+
 #%%
 word_entry = {}
 list_of_definitions = []
@@ -31,7 +32,7 @@ df = pl.from_dicts(list_of_definitions)
 list_of_parts_of_speech = df['part_of_speech'].to_list()
 while True:
     try:
-        part_of_speech_input = input(f'Please enter the part of speech you would like a meaning for: ({",".join(df["part_of_speech"].to_list())})\n').lower().strip()
+        part_of_speech_input = input(f'Please enter the part of speech you would like a meaning for: ({",".join(df["part_of_speech"].unique().to_list())})\n').lower().strip()
         if part_of_speech_input in list_of_parts_of_speech:
             pos_df = df.filter(pl.col('part_of_speech') == part_of_speech_input)
             print(pos_df)
